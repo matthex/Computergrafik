@@ -35,8 +35,9 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     */
 
 
+    /*
     //--- Blatt 1 - Aufgabe 3 ---
-    //Text Matrix Mult.
+    //Test Matrix Mult.
     Matrix<double, 4> mat1;
     mat1(0,0) = -1;
     mat1(0,1) = -1;
@@ -78,6 +79,7 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     qDebug() << mat3(3,0) << " " << mat3(3,1) << " " << mat3(3,2) << " " << mat3(3,3);
 
     //--- End Blatt 1 Aufgabe 3 Matrix Mult. Test---
+    */
 }
 
 
@@ -138,12 +140,123 @@ void GLBox::setPoint(Point2D p, Color c)
 
 void GLBox::bresenhamLine(Point2D p1, Point2D p2, Color color)
 {
+    int x1, y1, x2, y2, d;
+    if(p2.x > p1.x) {   //switch points if p2 is left of p1
+        x1 = p1.x;
+        y1 = p1.y;
+        x2 = p2.x;
+        y2 = p2.y;
+    } else {
+        x2 = p1.x;
+        y2 = p1.y;
+        x1 = p2.x;
+        y1 = p2.y;
+    }
+    int x = x1;
+    int y = y1;
+    int deltaX = x2-x1;
+    int deltaY = y2-y1;
+    //int deltaNE = 2*(deltaY-deltaX);
+    //int deltaE = 2*deltaY;
+    setPoint(Point2D(x,y), color);
 
+    //differentiation of gradient
+    if(deltaY >= 0){    //m >= 0
+        if(deltaY <= deltaX){   //m <= 1
+            //Case 1: Octant 1 (5)
+            d = 2*deltaY-deltaX;
+            while(x < x2){
+                if(d >= 0){
+                    d += 2*(deltaY-deltaX);
+                    x++;
+                    y++;
+                } else {
+                    d += 2*deltaY;
+                    x++;
+                }
+                setPoint(Point2D(x,y), color);
+            }
+        } else {    //m > 1
+            //Case 2: Octant 2 (6)          [swap x,y]
+            d = 2*deltaX-deltaY;
+            while(y < y2){
+                if(d >= 0){
+                    d += 2*(deltaX-deltaY);
+                    y++;
+                    x++;
+                } else {
+                    d += 2*deltaX;
+                    y++;
+                }
+                setPoint(Point2D(x,y), color);
+            }
+        }
+    } else {    //m < 0
+        if(-deltaY <= deltaX){   //m >= -1
+            //Case 3: Octant 3 (7)          [swap sign]
+            d = -2*deltaY-deltaX;
+            while(x < x2){
+                if(d >= 0){
+                    d += 2*(-deltaY-deltaX);
+                    x++;
+                    y--;
+                } else {
+                    d -= 2*deltaY;
+                    x++;
+                }
+                setPoint(Point2D(x,y), color);
+            }
+        } else {    //m < -1
+            //Case 4: Octant 4 (8)          [swap x,y]
+            d = 2*deltaX+deltaY;
+            while(-y < -y2){
+                if(d >= 0){
+                    d += 2*(deltaX+deltaY);
+                    y--;
+                    x++;
+                } else {
+                    d += 2*deltaX;
+                    y--;
+                }
+                setPoint(Point2D(x,y), color);
+            }
+        }
+    }
 }
 
 void GLBox::bresenhamCircle(Point2D center, int radius, Color color)
 {
-
+    int x1 = center.x;
+    int y1 = center.y;
+    int x = center.x;
+    int y = radius;
+    int d = 5-4*radius;
+    int deltaSE;
+    int deltaE;
+    setPoint(Point2D(x1,y1+radius), color);
+    setPoint(Point2D(x1,y1-radius), color);
+    setPoint(Point2D(x1+radius,y1), color);
+    setPoint(Point2D(x1-radius,y1), color);
+    while(y > x){
+        if(d >= 0) {    //SE
+            deltaSE = 4*(2*(x-y)+5);
+            d += deltaSE;
+            x++;
+            y--;
+        } else {    //E
+            deltaE = 4*(2*x+3);
+            d += deltaE;
+            x++;
+        }
+        setPoint(Point2D(x1+x,y1+y), color);
+        setPoint(Point2D(x1-x,y1+y), color);
+        setPoint(Point2D(x1+x,y1-y), color);
+        setPoint(Point2D(x1-x,y1-y), color);
+        setPoint(Point2D(x1+y,y1+x), color);
+        setPoint(Point2D(x1-y,y1+x), color);
+        setPoint(Point2D(x1+y,y1-x), color);
+        setPoint(Point2D(x1-y,y1-x), color);
+    }
 }
 
 
@@ -186,6 +299,8 @@ void GLBox::paintGL()
 
     Color red(1.0, 0.0, 0.0);
     Color blue(0.0, 0.0, 1.0);
+    Color green(0.0, 1.0, 0.0);
+    Color black(0.0, 0.0, 0.0);
 
     Point2D p1(0, 0);
     Point2D p2(-10, 10);
@@ -194,6 +309,30 @@ void GLBox::paintGL()
 
     Point2D center(20,20);
     setPoint(center, blue);
+
+    bresenhamLine(Point2D(0,0), Point2D(10,0),black);
+    bresenhamLine(Point2D(0,0), Point2D(10,5),black);
+    bresenhamLine(Point2D(0,0), Point2D(10,10),black);
+    bresenhamLine(Point2D(0,0), Point2D(5,10),black);
+
+    bresenhamLine(Point2D(0,0), Point2D(0,10),black);
+    bresenhamLine(Point2D(0,0), Point2D(-5,10),black);
+    bresenhamLine(Point2D(0,0), Point2D(-10,10),black);
+    bresenhamLine(Point2D(0,0), Point2D(-10,5),black);
+
+    bresenhamLine(Point2D(0,0), Point2D(-10,0),black);
+    bresenhamLine(Point2D(0,0), Point2D(-10,-5),black);
+    bresenhamLine(Point2D(0,0), Point2D(-10,-10),black);
+    bresenhamLine(Point2D(0,0), Point2D(-5,-10),black);
+
+    bresenhamLine(Point2D(0,0), Point2D(0,-10),black);
+    bresenhamLine(Point2D(0,0), Point2D(5,-10),black);
+    bresenhamLine(Point2D(0,0), Point2D(10,-10),black);
+    bresenhamLine(Point2D(0,0), Point2D(10,-5),black);
+
+    bresenhamLine(center, p1, red);
+    bresenhamLine(p2, center, blue);
+    bresenhamCircle(p1, 8, green);
 
     manageTexture();
 
