@@ -228,7 +228,7 @@ void GLBox::bresenhamCircle(Point2D center, int radius, Color color)
 {
     int x1 = center.x;
     int y1 = center.y;
-    int x = center.x;
+    int x = 0;
     int y = radius;
     int d = 5-4*radius;
     int deltaSE;
@@ -301,15 +301,22 @@ void GLBox::paintGL()
     Color blue(0.0, 0.0, 1.0);
     Color green(0.0, 1.0, 0.0);
     Color black(0.0, 0.0, 0.0);
+    Color brown(0.9,0.5,0.2);
+    Color brown2(0.7,0.5,0.2);
+    Color brown3(0.5,0.5,0.2);
+    Color grey(0.9,0.9,0.9);
+    Color yellow(1.0, 1.0, 0.0);
 
     Point2D p1(0, 0);
     Point2D p2(-10, 10);
-    setPoint(p1, red);
-    setPoint(p2, red);
+    //setPoint(p1, red);
+    //setPoint(p2, red);
 
     Point2D center(20,20);
-    setPoint(center, blue);
+    //setPoint(center, blue);
 
+/*
+    //Blatt 2 - Aufgabe 1
     bresenhamLine(Point2D(0,0), Point2D(10,0),black);
     bresenhamLine(Point2D(0,0), Point2D(10,5),black);
     bresenhamLine(Point2D(0,0), Point2D(10,10),black);
@@ -330,9 +337,61 @@ void GLBox::paintGL()
     bresenhamLine(Point2D(0,0), Point2D(10,-10),black);
     bresenhamLine(Point2D(0,0), Point2D(10,-5),black);
 
-    bresenhamLine(center, p1, red);
-    bresenhamLine(p2, center, blue);
-    bresenhamCircle(p1, 8, green);
+    //bresenhamLine(center, p1, red);
+    //bresenhamLine(p2, center, blue);
+
+    //Blatt 2 - Aufgabe 2
+    bresenhamCircle(Point2D(0,0), 20, green);
+*/
+
+    //Blat 2 - Bonus
+    //Background
+    bresenhamLine(Point2D(-29,-30),Point2D(29,-30), grey);
+    bresenhamLine(Point2D(-29,-29),Point2D(29,-29), grey);
+    bresenhamCircle(Point2D(-25,25), 3, yellow);
+    //Snowman
+    //Body
+    bresenhamCircle(Point2D(0,-17), 12, black);
+    bresenhamCircle(Point2D(0,4), 10, black);
+    bresenhamCircle(Point2D(0,20), 6, black);
+    bresenhamCircle(Point2D(0,-26), 1, black);
+    bresenhamCircle(Point2D(0,-15), 1, black);
+    bresenhamCircle(Point2D(0,-9), 1, black);
+    bresenhamCircle(Point2D(0,0), 1, black);
+    bresenhamCircle(Point2D(0,8), 1, black);
+    //Face
+    setPoint(Point2D(-2,22), blue);
+    setPoint(Point2D(2,22), blue);
+    setPoint(Point2D(-2,18), black);
+    setPoint(Point2D(-1,17), black);
+    setPoint(Point2D(0,17), black);
+    setPoint(Point2D(1,17), black);
+    setPoint(Point2D(2,18), black);
+    //Hat
+    bresenhamLine(Point2D(-10,25), Point2D(10,25), brown);
+    bresenhamLine(Point2D(-10,26), Point2D(10,26), brown);
+    bresenhamLine(Point2D(-5,27), Point2D(5,27), brown);
+    bresenhamLine(Point2D(-5,28), Point2D(5,28), brown);
+    bresenhamLine(Point2D(-4,29), Point2D(4,29), brown);
+    //Broom
+    bresenhamLine(Point2D(5,-2), Point2D(15,20), brown3);
+    bresenhamLine(Point2D(6,-2), Point2D(16,20), brown3);
+    bresenhamLine(Point2D(15,20), Point2D(13,25), brown2);
+    bresenhamLine(Point2D(15,20), Point2D(15,25), brown2);
+    bresenhamLine(Point2D(15,20), Point2D(17,25), brown2);
+    bresenhamLine(Point2D(16,20), Point2D(19,25), brown2);
+    bresenhamLine(Point2D(16,20), Point2D(20,24), brown2);
+    bresenhamLine(Point2D(16,20), Point2D(19,24), brown2);
+    bresenhamLine(Point2D(16,20), Point2D(20,22), brown2);
+    bresenhamLine(Point2D(16,20), Point2D(22,23), brown2);
+    //Shawl
+    bresenhamLine(Point2D(-5,13),Point2D(5,13), red);
+    bresenhamLine(Point2D(-4,14),Point2D(4,14), red);
+    bresenhamLine(Point2D(-4,15),Point2D(4,15), red);
+    bresenhamLine(Point2D(-5,14),Point2D(-6,0), red);
+    bresenhamLine(Point2D(-4,15),Point2D(-5,0), red);
+    bresenhamLine(Point2D(-3,15),Point2D(-4,0), red);
+
 
     manageTexture();
 
