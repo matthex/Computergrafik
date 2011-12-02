@@ -23,7 +23,6 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     m_winHeight = 600;
     // Initialize the texture buffer.
     m_buffer = new unsigned char[3*TEX_RES];
-    /*
     // Set the timeout to 50 milliseconds, corresponding to 20 FPS.
     m_timeout = 50; // 50 msecs
     m_timer = new QTimer(this);
@@ -31,55 +30,9 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     connect(m_timer, SIGNAL(timeout()), this, SLOT(animate()));
     // Start the timer.
     m_timer->start(m_timeout);
+    //Set the clock
+    m_clock = Clock(TEX_HALF_X, TEX_HALF_Y, Vec3d(50,50,1), 50, Vec3d(-0.5,-0.9,1));
     m_elapsed = 0;
-    */
-
-
-    /*
-    //--- Blatt 1 - Aufgabe 3 ---
-    //Test Matrix Mult.
-    Matrix<double, 4> mat1;
-    mat1(0,0) = -1;
-    mat1(0,1) = -1;
-    mat1(0,2) = 0;
-    mat1(0,3) = 0;
-    mat1(1,0) = -2;
-    mat1(1,1) = -3;
-    mat1(1,2) = 1;
-    mat1(1,3) = 1;
-    mat1(2,0) = 4;
-    mat1(2,1) = -1;
-    mat1(2,2) = -2;
-    mat1(2,3) = 2;
-    mat1(3,0) = 0;
-    mat1(3,1) = 0;
-    mat1(3,2) = 2;
-    mat1(3,3) = 1;
-
-    qDebug() << "Matrix 1"; qDebug() << mat1(0,0) << " " << mat1(0,1) << " " << mat1(0,2) << " " << mat1(0,3);
-    qDebug() << mat1(1,0) << " " << mat1(1,1) << " " << mat1(1,2) << " " << mat1(1,3);
-    qDebug() << mat1(2,0) << " " << mat1(2,1) << " " << mat1(2,2) << " " << mat1(2,3);
-    qDebug() << mat1(3,0) << " " << mat1(3,1) << " " << mat1(3,2) << " " << mat1(3,3);
-
-    Matrix<double, 4> mat2;
-    bool singular;
-    mat2 = mat1.inverse(singular);
-
-    qDebug() << "Matrix 1 Invers"; qDebug() << mat2(0,0) << " " << mat2(0,1) << " " << mat2(0,2) << " " << mat2(0,3);
-    qDebug() << mat2(1,0) << " " << mat2(1,1) << " " << mat2(1,2) << " " << mat2(1,3);
-    qDebug() << mat2(2,0) << " " << mat2(2,1) << " " << mat2(2,2) << " " << mat2(2,3);
-    qDebug() << mat2(3,0) << " " << mat2(3,1) << " " << mat2(3,2) << " " << mat2(3,3);
-
-    Matrix<double, 4> mat3;
-    mat3 = mat1.operator *(mat2);
-
-    qDebug() << "Matrix 1 * Matrix 1 Invers"; qDebug() << mat3(0,0) << " " << mat3(0,1) << " " << mat3(0,2) << " " << mat3(0,3);
-    qDebug() << mat3(1,0) << " " << mat3(1,1) << " " << mat3(1,2) << " " << mat3(1,3);
-    qDebug() << mat3(2,0) << " " << mat3(2,1) << " " << mat3(2,2) << " " << mat3(2,3);
-    qDebug() << mat3(3,0) << " " << mat3(3,1) << " " << mat3(3,2) << " " << mat3(3,3);
-
-    //--- End Blatt 1 Aufgabe 3 Matrix Mult. Test---
-    */
 }
 
 
@@ -99,8 +52,8 @@ void GLBox::manageTexture()
     glBindTexture(GL_TEXTURE_2D, m_texID);
 
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -138,19 +91,19 @@ void GLBox::setPoint(Point2D p, Color c)
     m_buffer[3*TO_LINEAR(x,y)+2] = (unsigned char)(255.0*c.b);
 }
 
-void GLBox::bresenhamLine(Point2D p1, Point2D p2, Color color)
+void GLBox::bresenhamLine(Vec3d v1, Vec3d v2, Color color)
 {
     int x1, y1, x2, y2, d;
-    if(p2.x > p1.x) {   //switch points if p2 is left of p1
-        x1 = p1.x;
-        y1 = p1.y;
-        x2 = p2.x;
-        y2 = p2.y;
+    if(v2(0) > v1(0)) {   //switch points if p2 is left of p1
+        x1 = (int)round(v1(0));
+        y1 = (int)round(v1(1));
+        x2 = (int)round(v2(0));
+        y2 = (int)round(v2(1));
     } else {
-        x2 = p1.x;
-        y2 = p1.y;
-        x1 = p2.x;
-        y1 = p2.y;
+        x2 = (int)round(v1(0));
+        y2 = (int)round(v1(1));
+        x1 = (int)round(v2(0));
+        y1 = (int)round(v2(1));
     }
     int x = x1;
     int y = y1;
@@ -224,19 +177,19 @@ void GLBox::bresenhamLine(Point2D p1, Point2D p2, Color color)
     }
 }
 
-void GLBox::bresenhamCircle(Point2D center, int radius, Color color)
+void GLBox::bresenhamCircle(Vec3d center, int radius, Color color)
 {
-    int x1 = center.x;
-    int y1 = center.y;
+    int x1 = (int)round(center(0));
+    int y1 = (int)round(center(1));
     int x = 0;
     int y = radius;
     int d = 5-4*radius;
     int deltaSE;
     int deltaE;
-    setPoint(Point2D(x1,y1+radius), color);
-    setPoint(Point2D(x1,y1-radius), color);
-    setPoint(Point2D(x1+radius,y1), color);
-    setPoint(Point2D(x1-radius,y1), color);
+    setPoint(Point2D(x1,y1+radius), color); //y
+    setPoint(Point2D(x1,y1-radius), color); //-y
+    setPoint(Point2D(x1+radius,y1), color); //x
+    setPoint(Point2D(x1-radius,y1), color); //-x
     while(y > x){
         if(d >= 0) {    //SE
             deltaSE = 4*(2*(x-y)+5);
@@ -248,14 +201,14 @@ void GLBox::bresenhamCircle(Point2D center, int radius, Color color)
             d += deltaE;
             x++;
         }
-        setPoint(Point2D(x1+x,y1+y), color);
-        setPoint(Point2D(x1-x,y1+y), color);
-        setPoint(Point2D(x1+x,y1-y), color);
-        setPoint(Point2D(x1-x,y1-y), color);
-        setPoint(Point2D(x1+y,y1+x), color);
-        setPoint(Point2D(x1-y,y1+x), color);
-        setPoint(Point2D(x1+y,y1-x), color);
-        setPoint(Point2D(x1-y,y1-x), color);
+        setPoint(Point2D(x1+y,y1+x), color); //1. O.
+        setPoint(Point2D(x1+x,y1+y), color); //2. O.
+        setPoint(Point2D(x1-x,y1+y), color); //3. O.
+        setPoint(Point2D(x1-y,y1+x), color); //4. O.
+        setPoint(Point2D(x1-y,y1-x), color); //5. O.
+        setPoint(Point2D(x1-x,y1-y), color); //6. O.
+        setPoint(Point2D(x1+x,y1-y), color); //7. O.
+        setPoint(Point2D(x1+y,y1-x), color); //8. O.
     }
 }
 
@@ -297,101 +250,16 @@ void GLBox::paintGL()
 
     clearImage(Color(1.0, 1.0, 1.0));
 
-    Color red(1.0, 0.0, 0.0);
-    Color blue(0.0, 0.0, 1.0);
-    Color green(0.0, 1.0, 0.0);
     Color black(0.0, 0.0, 0.0);
-    Color brown(0.9,0.5,0.2);
-    Color brown2(0.7,0.5,0.2);
-    Color brown3(0.5,0.5,0.2);
-    Color grey(0.9,0.9,0.9);
-    Color yellow(1.0, 1.0, 0.0);
+    Color grey(0.3, 0.3, 0.3);
 
-    Point2D p1(0, 0);
-    Point2D p2(-10, 10);
-    //setPoint(p1, red);
-    //setPoint(p2, red);
+    //Static clock
+    bresenhamCircle(m_clock.getCenter(), m_clock.getRadius(), black);
+    bresenhamLine(m_clock.getCenter(), m_clock.getLonghand(), black);
+    bresenhamLine(m_clock.getCenter(), m_clock.getShorthand(), grey);
 
-    Point2D center(20,20);
-    //setPoint(center, blue);
 
-/*
-    //Blatt 2 - Aufgabe 1
-    bresenhamLine(Point2D(0,0), Point2D(10,0),black);
-    bresenhamLine(Point2D(0,0), Point2D(10,5),black);
-    bresenhamLine(Point2D(0,0), Point2D(10,10),black);
-    bresenhamLine(Point2D(0,0), Point2D(5,10),black);
-
-    bresenhamLine(Point2D(0,0), Point2D(0,10),black);
-    bresenhamLine(Point2D(0,0), Point2D(-5,10),black);
-    bresenhamLine(Point2D(0,0), Point2D(-10,10),black);
-    bresenhamLine(Point2D(0,0), Point2D(-10,5),black);
-
-    bresenhamLine(Point2D(0,0), Point2D(-10,0),black);
-    bresenhamLine(Point2D(0,0), Point2D(-10,-5),black);
-    bresenhamLine(Point2D(0,0), Point2D(-10,-10),black);
-    bresenhamLine(Point2D(0,0), Point2D(-5,-10),black);
-
-    bresenhamLine(Point2D(0,0), Point2D(0,-10),black);
-    bresenhamLine(Point2D(0,0), Point2D(5,-10),black);
-    bresenhamLine(Point2D(0,0), Point2D(10,-10),black);
-    bresenhamLine(Point2D(0,0), Point2D(10,-5),black);
-
-    //bresenhamLine(center, p1, red);
-    //bresenhamLine(p2, center, blue);
-
-    //Blatt 2 - Aufgabe 2
-    bresenhamCircle(Point2D(0,0), 20, green);
-*/
-
-    //Blat 2 - Bonus
-    //Background
-    bresenhamLine(Point2D(-29,-30),Point2D(29,-30), grey);
-    bresenhamLine(Point2D(-29,-29),Point2D(29,-29), grey);
-    bresenhamCircle(Point2D(-25,25), 3, yellow);
-    //Snowman
-    //Body
-    bresenhamCircle(Point2D(0,-17), 12, black);
-    bresenhamCircle(Point2D(0,4), 10, black);
-    bresenhamCircle(Point2D(0,20), 6, black);
-    bresenhamCircle(Point2D(0,-26), 1, black);
-    bresenhamCircle(Point2D(0,-15), 1, black);
-    bresenhamCircle(Point2D(0,-9), 1, black);
-    bresenhamCircle(Point2D(0,0), 1, black);
-    bresenhamCircle(Point2D(0,8), 1, black);
-    //Face
-    setPoint(Point2D(-2,22), blue);
-    setPoint(Point2D(2,22), blue);
-    setPoint(Point2D(-2,18), black);
-    setPoint(Point2D(-1,17), black);
-    setPoint(Point2D(0,17), black);
-    setPoint(Point2D(1,17), black);
-    setPoint(Point2D(2,18), black);
-    //Hat
-    bresenhamLine(Point2D(-10,25), Point2D(10,25), brown);
-    bresenhamLine(Point2D(-10,26), Point2D(10,26), brown);
-    bresenhamLine(Point2D(-5,27), Point2D(5,27), brown);
-    bresenhamLine(Point2D(-5,28), Point2D(5,28), brown);
-    bresenhamLine(Point2D(-4,29), Point2D(4,29), brown);
-    //Broom
-    bresenhamLine(Point2D(5,-2), Point2D(15,20), brown3);
-    bresenhamLine(Point2D(6,-2), Point2D(16,20), brown3);
-    bresenhamLine(Point2D(15,20), Point2D(13,25), brown2);
-    bresenhamLine(Point2D(15,20), Point2D(15,25), brown2);
-    bresenhamLine(Point2D(15,20), Point2D(17,25), brown2);
-    bresenhamLine(Point2D(16,20), Point2D(19,25), brown2);
-    bresenhamLine(Point2D(16,20), Point2D(20,24), brown2);
-    bresenhamLine(Point2D(16,20), Point2D(19,24), brown2);
-    bresenhamLine(Point2D(16,20), Point2D(20,22), brown2);
-    bresenhamLine(Point2D(16,20), Point2D(22,23), brown2);
-    //Shawl
-    bresenhamLine(Point2D(-5,13),Point2D(5,13), red);
-    bresenhamLine(Point2D(-4,14),Point2D(4,14), red);
-    bresenhamLine(Point2D(-4,15),Point2D(4,15), red);
-    bresenhamLine(Point2D(-5,14),Point2D(-6,0), red);
-    bresenhamLine(Point2D(-4,15),Point2D(-5,0), red);
-    bresenhamLine(Point2D(-3,15),Point2D(-4,0), red);
-
+    //-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-\\
 
     manageTexture();
 
@@ -419,12 +287,10 @@ void GLBox::paintGL()
 
 void GLBox::animate()
 {
-    /*
     // At each timeout, increase the elapsed time until it reaches 100. Then it is set to zero and the hands of the clock are moved.
     m_elapsed = (m_elapsed + qobject_cast<QTimer*>(sender())->interval()) % 100;
     m_clock.update(m_elapsed);
     updateGL();
-    */
 }
 
 void GLBox::mousePressEvent( QMouseEvent *e )

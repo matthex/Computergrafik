@@ -21,10 +21,11 @@
 #include "matrix.h"
 #include "Color.h"
 #include "Point2D.h"
+#include "clock.h"
 
 // Texture resolution
-#define TEX_RES_X 60
-#define TEX_RES_Y 60
+#define TEX_RES_X 400
+#define TEX_RES_Y 400
 
 // Number of pixels in the texture
 #define TEX_RES TEX_RES_X*TEX_RES_Y
@@ -48,10 +49,10 @@ public:
     ~GLBox();
 
     // Draws a line from point p1 to point p2 with the given color using Bresenham's algorithm.
-    void bresenhamLine(Point2D p1, Point2D p2, Color color = Color(0.0, 0.0, 0.0));
+    void bresenhamLine(Vec3d v1, Vec3d v2, Color color = Color(0.0, 0.0, 0.0));
 
     // Draws a circle of the given radius around the center with the given color using Bresenham's algorithm.
-    void bresenhamCircle(Point2D center, int radius, Color color = Color(0.0, 0.0, 0.0));
+    void bresenhamCircle(Vec3d center, int radius, Color color = Color(0.0, 0.0, 0.0));
 
 public slots:
     // Perform all computations necessary to animate the scene. Invoked by the timer.
@@ -106,11 +107,10 @@ private:
     int m_winHeight; // Window height
     GLuint m_texID; // Texture ID for OpenGL
 
-    /*
     unsigned int m_timeout; // Timeout of the animation timer in milliseconds
+    Clock m_clock;  //Clock
     int m_elapsed;  // Elapsed time during animation.
     QTimer *m_timer; // Timer object
-    */
 };
 
 #endif // _GLBOX_H_
