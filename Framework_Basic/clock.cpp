@@ -1,9 +1,8 @@
 #include "clock.h"
-#include <QDebug>
 
 Clock::Clock()
 {
-
+    //Nothing to do
 }
 
 Clock::Clock(int winWidth, int winHeight, Vec3d center, double radius, Vec3d transVec)
@@ -13,11 +12,15 @@ Clock::Clock(int winWidth, int winHeight, Vec3d center, double radius, Vec3d tra
     m_longhand = Vec3d(m_center(0), m_center(1)+m_radius*0.9, m_center(2));
     m_shorthand = Vec3d(m_center(0), m_center(1)+m_radius*0.6, m_center(2));
 
-    m_longhandAngle = 0.048;
-    m_shorthandAngle = 0.004;
+    m_longhandAngle = M_PI/30;  //6°
+    m_shorthandAngle = M_PI/6;  //30°
+    m_longhandRot = makeRotMat(-m_longhandAngle);
+    m_shorthandRot = makeRotMat(-m_shorthandAngle);
 
     m_transVec = transVec;
     m_transMat = makeTransMat(m_transVec);
+
+    m_longhandCounter = 0;
 
     m_winWidth = winWidth;
     m_winHeight = winHeight;
@@ -51,13 +54,16 @@ Vec3d Clock::getShorthand()
 void Clock::update(int elapsed)
 {
     //Rotate hands
-    m_longhand = makeTransMat(m_center)*makeRotMat(-m_longhandAngle)*makeTransMat(-m_center)*m_longhand;
-    m_shorthand = makeTransMat(m_center)*makeRotMat(-m_shorthandAngle)*makeTransMat(-m_center)*m_shorthand;
-
-    //Move clock
-    m_center = m_transMat*m_center;
-    m_longhand = m_transMat*m_longhand;
-    m_shorthand = m_transMat*m_shorthand;
+    if(elapsed == 0)
+    {
+        m_longhand = makeTransMat(m_center)*m_longhandRot*makeTransMat(-m_center)*m_longhand;
+        m_longhandCounter++;
+        if(m_longhandCounter == 60)
+        {
+            m_shorthand = makeTransMat(m_center)*m_shorthandRot*makeTransMat(-m_center)*m_shorthand;
+            m_longhandCounter =0;
+        }
+    }
 
     //Check collission
     if(m_center(0)+m_radius+abs(m_transVec(0))+2 > m_winWidth || m_center(0)-m_radius-abs(m_transVec(0))-2 < -m_winWidth)
@@ -70,6 +76,11 @@ void Clock::update(int elapsed)
         m_transVec(1) = -m_transVec(1);
         m_transMat = makeTransMat(m_transVec);
     }
+
+    //Move clock
+    m_center = m_transMat*m_center;
+    m_longhand = m_transMat*m_longhand;
+    m_shorthand = m_transMat*m_shorthand;
 }
 
 Mat3d Clock::makeRotMat(double angle)

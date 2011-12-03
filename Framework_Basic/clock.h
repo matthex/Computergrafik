@@ -31,14 +31,17 @@ public:
     Mat3d makeTransMat(Vec3d transVec);
 
 private:
-    Vec3d m_center;     //Center of clock
+    Vec3d m_center;         //Center of clock
     double m_radius;
-    Vec3d m_longhand;     //End of long hand
-    Vec3d m_shorthand;  //End of short hand
+    Vec3d m_longhand;       //End of long hand
+    Vec3d m_shorthand;      //End of short hand
     double m_longhandAngle;
     double m_shorthandAngle;
+    Mat3d m_longhandRot;
+    Mat3d m_shorthandRot;
     Vec3d m_transVec;
     Mat3d m_transMat;
+    int m_longhandCounter;
     int m_winWidth;
     int m_winHeight;
 };
