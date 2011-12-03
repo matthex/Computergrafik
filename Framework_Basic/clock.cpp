@@ -51,22 +51,8 @@ Vec3d Clock::getShorthand()
 void Clock::update(int elapsed)
 {
     //Rotate hands
-    Mat3d mat1;
-    mat1(0,0) = 1;
-    mat1(1,1) = 1;
-    mat1(2,2) = 1;
-    mat1(0,2) = m_center(0);
-    mat1(1,2) = m_center(1);
-
-    Mat3d mat2;
-    mat2(0,0) = 1;
-    mat2(1,1) = 1;
-    mat2(2,2) = 1;
-    mat2(0,2) = -m_center(0);
-    mat2(1,2) = -m_center(1);
-
-    m_longhand = mat1*makeRotMat(-m_longhandAngle)*mat2*m_longhand;
-    m_shorthand = mat1*makeRotMat(-m_shorthandAngle)*mat2*m_shorthand;
+    m_longhand = makeTransMat(m_center)*makeRotMat(-m_longhandAngle)*makeTransMat(-m_center)*m_longhand;
+    m_shorthand = makeTransMat(m_center)*makeRotMat(-m_shorthandAngle)*makeTransMat(-m_center)*m_shorthand;
 
     //Move clock
     m_center = m_transMat*m_center;
@@ -103,7 +89,7 @@ Mat3d Clock::makeTransMat(Vec3d m_transVec)
     transMat(0,0) = 1;
     transMat(1,1) = 1;
     transMat(2,2) = 1;
-    transMat(0,3) = m_transVec(0);
-    transMat(1,3) = m_transVec(1);    //Other entries are 0
+    transMat(0,2) = m_transVec(0);
+    transMat(1,2) = m_transVec(1);    //Other entries are 0
     return transMat;
 }
