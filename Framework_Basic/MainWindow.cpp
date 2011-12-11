@@ -25,6 +25,13 @@ MainWindow::MainWindow (QWidget *parent, const char *name)
     // Layout that contains the slider widget.
     QHBoxLayout *sliderLayout = new QHBoxLayout();
     centralLayout->addLayout(sliderLayout);
+
+    //QSlider object for focus
+    focusSlider = new QSlider(Qt::Horizontal, this);
+    focusSlider->setMinimum(1);
+    focusSlider->setValue(glbox->getFocus());
+    connect(focusSlider, SIGNAL(valueChanged(int)), this, SLOT(changeFocus(int)));
+    sliderLayout->addWidget(focusSlider);
 }
 
 GLBox *MainWindow::getGLBox ()
@@ -35,4 +42,9 @@ GLBox *MainWindow::getGLBox ()
 void MainWindow::fileExit()
 {
     qApp->quit();
+}
+
+void MainWindow::changeFocus(int focus)
+{
+    glbox->setFocus((double)focus);
 }

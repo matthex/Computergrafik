@@ -33,6 +33,9 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     //Set the clock
     m_clock = Clock(TEX_HALF_X, TEX_HALF_Y, Vec3d(50,50,1), 50, Vec3d(-0.5,-0.9,1));
     m_elapsed = 0;
+    m_focus = 1;
+    //Initialize the cuboids
+    initializeCuboids();
 }
 
 
@@ -253,11 +256,18 @@ void GLBox::paintGL()
     Color black(0.0, 0.0, 0.0);
     Color grey(0.3, 0.3, 0.3);
 
-    //Static clock
-    bresenhamCircle(m_clock.getCenter(), m_clock.getRadius(), black);
-    bresenhamLine(m_clock.getCenter(), m_clock.getLonghand(), black);
-    bresenhamLine(m_clock.getCenter(), m_clock.getShorthand(), grey);
+    //Clock
+//    bresenhamCircle(m_clock.getCenter(), m_clock.getRadius(), black);
+//    bresenhamLine(m_clock.getCenter(), m_clock.getLonghand(), black);
+//    bresenhamLine(m_clock.getCenter(), m_clock.getShorthand(), grey);
 
+
+
+
+    //Cuboids
+    makeCuboid(m_cub1);
+    makeCuboid(m_cub2);
+    makeCuboid(m_cub3);
 
     //-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-\\
 
@@ -289,7 +299,19 @@ void GLBox::animate()
 {
     // At each timeout, increase the elapsed time until it reaches 100. Then it is set to zero and the hands of the clock are moved.
     m_elapsed = (m_elapsed + qobject_cast<QTimer*>(sender())->interval()) % 100;
-    m_clock.update(m_elapsed);
+    //m_clock.update(m_elapsed);
+
+    //Animate cuboids
+    transVec = Vec4d(0.001,-0.003,0.002,1);
+    rotAxis = Vec4d(1,1,1,1);
+    angle1 = M_PI/12;
+    for(int i=0; i<8; i++)
+    {
+        m_cub1[i] = cubTransMat.makeTransMat(transVec)*m_cub1[i];
+        //m_cub2[i] = cubRotMat.makeRotMat(angle1,rotAxis)*m_cub2[i]; //nur normale oder Punktrotation!
+        m_cub1[i] = cubRotMat.makeRotMatPoint(angle1,rotAxis,m_cub1[1])*m_cub1[i];
+    }
+
     updateGL();
 }
 
@@ -360,4 +382,220 @@ void GLBox::keyPressEvent(QKeyEvent *e)
 
     e->accept();
     updateGL();
+}
+
+void GLBox::initializeCuboids()
+{
+    //Creation of cuboid 1
+    Vec4d cub1p1;
+    cub1p1(0) = -0.4;
+    cub1p1(1) = 0.2;
+    cub1p1(2) = -0.5;
+    cub1p1(3) = 1.0;
+    m_cub1[0] = cub1p1;
+    Vec4d cub1p2;
+    cub1p2(0) = 0.5;
+    cub1p2(1) = 0.2;
+    cub1p2(2) = -0.5;
+    cub1p2(3) = 1.0;
+    m_cub1[1] = cub1p2;
+    Vec4d cub1p3;
+    cub1p3(0) = 0.5;
+    cub1p3(1) = 0.6;
+    cub1p3(2) = -0.5;
+    cub1p3(3) = 1.0;
+    m_cub1[2] = cub1p3;
+    Vec4d cub1p4;
+    cub1p4(0) = -0.4;
+    cub1p4(1) = 0.6;
+    cub1p4(2) = -0.5;
+    cub1p4(3) = 1.0;
+    m_cub1[3] = cub1p4;
+    Vec4d cub1p5;
+    cub1p5(0) = -0.4;
+    cub1p5(1) = 0.2;
+    cub1p5(2) = 0.3;
+    cub1p5(3) = 1.0;
+    m_cub1[4] = cub1p5;
+    Vec4d cub1p6;
+    cub1p6(0) = 0.5;
+    cub1p6(1) = 0.2;
+    cub1p6(2) = 0.3;
+    cub1p6(3) = 1.0;
+    m_cub1[5] = cub1p6;
+    Vec4d cub1p7;
+    cub1p7(0) = 0.5;
+    cub1p7(1) = 0.6;
+    cub1p7(2) = 0.3;
+    cub1p7(3) = 1.0;
+    m_cub1[6] = cub1p7;
+    Vec4d cub1p8;
+    cub1p8(0) = -0.4;
+    cub1p8(1) = 0.6;
+    cub1p8(2) = 0.3;
+    cub1p8(3) = 1.0;
+    m_cub1[7] = cub1p8;
+
+    //Creation of cuboid 2
+    Vec4d cub2p1;
+    cub2p1(0) = 0.7;
+    cub2p1(1) = 0.2;
+    cub2p1(2) = 0.8;
+    cub2p1(3) = 1.0;
+    m_cub2[0] = cub2p1;
+    Vec4d cub2p2;
+    cub2p2(0) = 0.5;
+    cub2p2(1) = 0.2;
+    cub2p2(2) = 0.8;
+    cub2p2(3) = 1.0;
+    m_cub2[1] = cub2p2;
+    Vec4d cub2p3;
+    cub2p3(0) = 0.5;
+    cub2p3(1) = -0.4;
+    cub2p3(2) = 0.8;
+    cub2p3(3) = 1.0;
+    m_cub2[2] = cub2p3;
+    Vec4d cub2p4;
+    cub2p4(0) = 0.7;
+    cub2p4(1) = -0.4;
+    cub2p4(2) = 0.8;
+    cub2p4(3) = 1.0;
+    m_cub2[3] = cub2p4;
+    Vec4d cub2p5;
+    cub2p5(0) = 0.7;
+    cub2p5(1) = 0.2;
+    cub2p5(2) = -0.3;
+    cub2p5(3) = 1.0;
+    m_cub2[4] = cub2p5;
+    Vec4d cub2p6;
+    cub2p6(0) = 0.5;
+    cub2p6(1) = 0.2;
+    cub2p6(2) = -0.3;
+    cub2p6(3) = 1.0;
+    m_cub2[5] = cub2p6;
+    Vec4d cub2p7;
+    cub2p7(0) = 0.5;
+    cub2p7(1) = -0.4;
+    cub2p7(2) = -0.3;
+    cub2p7(3) = 1.0;
+    m_cub2[6] = cub2p7;
+    Vec4d cub2p8;
+    cub2p8(0) = 0.7;
+    cub2p8(1) = -0.4;
+    cub2p8(2) = -0.3;
+    cub2p8(3) = 1.0;
+    m_cub2[7] = cub2p8;
+
+    //Creation of cuboid 3
+    Vec4d cub3p1;
+    cub3p1(0) = -0.2;
+    cub3p1(1) = -0.7;
+    cub3p1(2) = -0.5;
+    cub3p1(3) = 1.0;
+    m_cub3[0] = cub3p1;
+    Vec4d cub3p2;
+    cub3p2(0) = 0.5;
+    cub3p2(1) = -0.7;
+    cub3p2(2) = -0.5;
+    cub3p2(3) = 1.0;
+    m_cub3[1] = cub3p2;
+    Vec4d cub3p3;
+    cub3p3(0) = 0.5;
+    cub3p3(1) =  -0.9;
+    cub3p3(2) = -0.5;
+    cub3p3(3) = 1.0;
+    m_cub3[2] = cub3p3;
+    Vec4d cub3p4;
+    cub3p4(0) = -0.2;
+    cub3p4(1) =  -0.9;
+    cub3p4(2) = -0.5;
+    cub3p4(3) = 1.0;
+    m_cub3[3] = cub3p4;
+    Vec4d cub3p5;
+    cub3p5(0) = -0.2;
+    cub3p5(1) = -0.7;
+    cub3p5(2) = -0.3;
+    cub3p5(3) = 1.0;
+    m_cub3[4] = cub3p5;
+    Vec4d cub3p6;
+    cub3p6(0) = 0.5;
+    cub3p6(1) = -0.7;
+    cub3p6(2) = -0.3;
+    cub3p6(3) = 1.0;
+    m_cub3[5] = cub3p6;
+    Vec4d cub3p7;
+    cub3p7(0) = 0.5;
+    cub3p7(1) =  -0.9;
+    cub3p7(2) = -0.3;
+    cub3p7(3) = 1.0;
+    m_cub3[6] = cub3p7;
+    Vec4d cub3p8;
+    cub3p8(0) = -0.2;
+    cub3p8(1) =  -0.9;
+    cub3p8(2) = -0.3;
+    cub3p8(3) = 1.0;
+    m_cub3[7] = cub3p8;
+}
+
+void GLBox::makeCuboid(Vec4d cub[8])
+{
+    Color black(0.0, 0.0, 0.0);
+    Vec3d cub2[8];
+    Vec4d projectedVec;
+
+    //Calculate actual points
+    for(int i=0; i<8; i++)
+    {
+        projectedVec = projectZ(cub[i], m_focus);
+        cub2[i](0)=projectedVec(0)*double(TEX_HALF_X);
+        cub2[i](1)=projectedVec(1)*double(TEX_HALF_Y);
+        cub2[i](2)=projectedVec(2);
+    }
+
+    //Draw lines
+    bresenhamLine(cub2[0], cub2[1], black);
+    bresenhamLine(cub2[0], cub2[3], black);
+    bresenhamLine(cub2[0], cub2[4], black);
+    bresenhamLine(cub2[1], cub2[2], black);
+    bresenhamLine(cub2[1], cub2[5], black);
+    bresenhamLine(cub2[2], cub2[3], black);
+    bresenhamLine(cub2[2], cub2[6], black);
+    bresenhamLine(cub2[3], cub2[7], black);
+    bresenhamLine(cub2[4], cub2[5], black);
+    bresenhamLine(cub2[4], cub2[7], black);
+    bresenhamLine(cub2[5], cub2[6], black);
+    bresenhamLine(cub2[6], cub2[7], black);
+}
+
+Vec4d GLBox::projectZ(Vec4d &vec, double focus)
+{
+    if(focus==0) return Vec4d();
+
+    Mat4d projectMat;
+    projectMat(0,0) = 1;
+    projectMat(1,1) = 1;
+    projectMat(3,3) = 1;
+    projectMat(3,2) = -1/focus;
+
+    Vec4d projectVec;
+    projectVec = projectMat*vec;
+
+    //Normalize
+    for(int i=0; i<4; i++)
+    {
+        projectVec(i) /= projectVec(3);
+    }
+
+    return projectVec;
+}
+
+void GLBox::setFocus(double focus)
+{
+    m_focus = focus;
+    updateGL();
+}
+
+double GLBox::getFocus()
+{
+    return m_focus;
 }

@@ -61,17 +61,17 @@ void Clock::update(int elapsed)
         if(m_longhandCounter == 60)
         {
             m_shorthand = makeTransMat(m_center)*m_shorthandRot*makeTransMat(-m_center)*m_shorthand;
-            m_longhandCounter =0;
+            m_longhandCounter = 0;
         }
     }
 
     //Check collission
-    if(m_center(0)+m_radius+abs(m_transVec(0))+2 > m_winWidth || m_center(0)-m_radius-abs(m_transVec(0))-2 < -m_winWidth)
+    if(m_center(0)+m_radius+2 > m_winWidth || m_center(0)-m_radius-2 < -m_winWidth)
     {
         m_transVec(0) = -m_transVec(0);
         m_transMat = makeTransMat(m_transVec);
     }
-    if(m_center(1)+m_radius+abs(m_transVec(1))+2 > m_winHeight || m_center(1)-m_radius-abs(m_transVec(1))-2 < -m_winHeight)
+    if(m_center(1)+m_radius+2 > m_winHeight || m_center(1)-m_radius-2 < -m_winHeight)
     {
         m_transVec(1) = -m_transVec(1);
         m_transMat = makeTransMat(m_transVec);

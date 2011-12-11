@@ -187,6 +187,128 @@ public:
         return result;
     }
 
+    //Rotation matrix in 3D: Z axis
+    Matrix<double, 4> makeRotMatZ(double angle)
+    {
+        Matrix<double, 4> rotMat;
+        rotMat(0,0) = cos(angle);
+        rotMat(0,1) = -sin(angle);
+        rotMat(1,0) = sin(angle);
+        rotMat(1,1) = cos(angle);
+        rotMat(2,2) = 1;
+        rotMat(3,3) = 1;        //Other entries are 0
+
+        return rotMat;
+    }
+
+    //Rotation matrix in 3D: X axis
+    Matrix<double, 4> makeRotMatX(double angle)
+    {
+        Matrix<double, 4> rotMat;
+        rotMat(1,1) = cos(angle);
+        rotMat(1,2) = -sin(angle);
+        rotMat(2,1) = sin(angle);
+        rotMat(2,2) = cos(angle);
+        rotMat(0,0) = 1;
+        rotMat(3,3) = 1;        //Other entries are 0
+
+        return rotMat;
+    }
+
+    //Rotation matrix in 3D: Y axis
+    Matrix<double, 4> makeRotMatY(double angle)
+    {
+        Matrix<double, 4> rotMat;
+        rotMat(0,0) = cos(angle);
+        rotMat(0,2) = sin(angle);
+        rotMat(2,0) = -sin(angle);
+        rotMat(2,2) = cos(angle);
+        rotMat(1,1) = 1;
+        rotMat(3,3) = 1;        //Other entries are 0
+
+        return rotMat;
+    }
+
+    //Translation matrix in 3D
+    Matrix<double, 4> makeTransMat(Vector<T, SIZE> vec)
+    {
+        Matrix<double, 4> transMat;
+        transMat(0,0) = 1;
+        transMat(1,1) = 1;
+        transMat(2,2) = 1;
+        transMat(3,3) = 1;
+        transMat(0,3) = vec(0);
+        transMat(1,3) = vec(1);
+        transMat(2,3) = vec(2);     //Other entries are 0
+
+        return transMat;
+    }
+
+    //Rotation matrix in 3D: any axis
+    Matrix<double, 4> makeRotMat(double angle, Vector<T, SIZE> &vec1)
+    {
+        //Vector of length 1
+        double vecLength = sqrt(vec1(0)*vec1(0) + vec1(1)*vec1(1) + vec1(2)*vec1(2));
+
+        Vector<T, SIZE> vec = Vector<T, SIZE>(vec1(0)/vecLength,vec1(1)/vecLength,vec1(2)/vecLength,1);
+
+        Matrix<double, 4> rotMat;
+        double d = sqrt(vec(0)*vec(0) + vec(1)*vec(1));
+
+        //Rz
+        Matrix<double, 4> rotZ;
+        rotZ(0,0) = vec(0)/d;
+        rotZ(0,1) = vec(1)/d;
+        rotZ(1,0) = -vec(1)/d;
+        rotZ(1,1) = vec(0)/d;
+        rotZ(2,2) = 1;
+        rotZ(3,3) = 1;
+
+        //Ry
+        Matrix<double, 4> rotY;
+        rotY(0,0) = vec(2);
+        rotY(0,2) = -d;
+        rotY(2,0) = d;
+        rotY(1,1) = 1;
+        rotY(2,2) = vec(2);
+        rotY(3,3) = 1;
+
+        //Rz2
+        Matrix<double, 4> rotZ2;
+        rotZ2 = makeRotMatZ(angle);
+        if (d==0) return rotZ2; // Rotation um z-Achse
+
+        //Rz return
+        Matrix<double, 4> rotZre;
+        rotZre(0,0) = vec(0)/d;
+        rotZre(0,1) = -vec(1)/d;
+        rotZre(1,0) = vec(1)/d;
+        rotZre(1,1) = vec(0)/d;
+        rotZre(2,2) = 1;
+        rotZre(3,3) = 1;
+
+        //Ry return
+        Matrix<double, 4> rotYre;
+        rotYre(0,0) = vec(2);
+        rotYre(0,2) = d;
+        rotYre(2,0) = -d;
+        rotYre(1,1) = 1;
+        rotYre(2,2) = vec(2);
+        rotYre(3,3) = 1;
+
+        //Rotation matrix
+        rotMat = rotZ*rotY*rotZ2*rotYre*rotZre;
+
+        return rotMat;
+    }
+
+    //Rotation matrix in 3D: any axis, any point
+    Matrix<double, 4> makeRotMatPoint(double angle, Vector<T, SIZE> &vec, Vector<T, SIZE> p_vec)
+    {
+        return makeTransMat(p_vec)*makeRotMat(angle,vec)*makeTransMat(-p_vec);
+    }
+
+
 private:
     T m_data[SIZE][SIZE];
 };

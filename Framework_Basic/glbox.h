@@ -54,6 +54,12 @@ public:
     // Draws a circle of the given radius around the center with the given color using Bresenham's algorithm.
     void bresenhamCircle(Vec3d center, int radius, Color color = Color(0.0, 0.0, 0.0));
 
+    //Set new focus
+    void setFocus(double focus);
+
+    //Get focus
+    double getFocus();
+
 public slots:
     // Perform all computations necessary to animate the scene. Invoked by the timer.
     void animate();
@@ -96,6 +102,16 @@ protected:
     // Invoked when a key is pressed.
     void keyPressEvent(QKeyEvent *);
 
+    //Initialize cuboids
+    void initializeCuboids();
+
+    // Draw a cuboid
+    void makeCuboid(Vec4d cub[8]);
+
+    // Projection
+    Vec4d projectZ(Vec4d &vec, double focus);
+
+
 private:
     double scale;   // zoom factor
 
@@ -111,6 +127,18 @@ private:
     Clock m_clock;  //Clock
     int m_elapsed;  // Elapsed time during animation.
     QTimer *m_timer; // Timer object
+
+    double m_focus; //focus
+
+    Vec4d m_cub1[8];
+    Vec4d m_cub2[8];
+    Vec4d m_cub3[8];
+
+    Mat4d cubTransMat;
+    Vec4d transVec;
+    Mat4d cubRotMat;
+    Vec4d rotAxis;
+    double angle1;
 };
 
 #endif // _GLBOX_H_
