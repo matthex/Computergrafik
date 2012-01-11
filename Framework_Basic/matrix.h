@@ -255,6 +255,11 @@ public:
         Matrix<double, 4> rotMat;
         double d = sqrt(vec(0)*vec(0) + vec(1)*vec(1));
 
+        //Rz2
+        Matrix<double, 4> rotZ2;
+        rotZ2 = makeRotMatZ(angle);
+        if (d==0) return rotZ2; // Rotation um z-Achse
+
         //Rz
         Matrix<double, 4> rotZ;
         rotZ(0,0) = vec(0)/d;
@@ -272,11 +277,6 @@ public:
         rotY(1,1) = 1;
         rotY(2,2) = vec(2);
         rotY(3,3) = 1;
-
-        //Rz2
-        Matrix<double, 4> rotZ2;
-        rotZ2 = makeRotMatZ(angle);
-        if (d==0) return rotZ2; // Rotation um z-Achse
 
         //Rz return
         Matrix<double, 4> rotZre;
@@ -297,7 +297,7 @@ public:
         rotYre(3,3) = 1;
 
         //Rotation matrix
-        rotMat = rotZ*rotY*rotZ2*rotYre*rotZre;
+        rotMat = rotZre*rotYre*rotZ2*rotY*rotZ;
 
         return rotMat;
     }

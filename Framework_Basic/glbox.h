@@ -22,10 +22,12 @@
 #include "Color.h"
 #include "Point2D.h"
 #include "clock.h"
+#include "camera.h"
+#include "sphere.h"
 
 // Texture resolution
-#define TEX_RES_X 400
-#define TEX_RES_Y 400
+#define TEX_RES_X 200
+#define TEX_RES_Y 200
 
 // Number of pixels in the texture
 #define TEX_RES TEX_RES_X*TEX_RES_Y
@@ -111,6 +113,12 @@ protected:
     // Projection
     Vec4d projectZ(Vec4d &vec, double focus);
 
+    // Draw sphere
+    void makeSphere(sphere sph);
+
+    // Ray casting
+    void raycast();
+
 
 private:
     double scale;   // zoom factor
@@ -139,6 +147,20 @@ private:
     Mat4d cubRotMat;
     Vec4d rotAxis;
     double angle1;
+
+    Vec3d cub2[8];
+    Vec4d projectedVec;
+
+    Camera m_cam;
+
+    sphere m_sphere1;
+    sphere m_sphere2;
+
+    Mat4d sphereTransMat;
+    double angle2;
+    Vec4d sphereRotAxis;
+
+    Vec4d tempVec;
 };
 
 #endif // _GLBOX_H_

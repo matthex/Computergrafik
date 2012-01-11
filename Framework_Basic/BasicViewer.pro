@@ -12,12 +12,16 @@ HEADERS += \
     Point2D.h \
     vector.h \
     matrix.h \
-    clock.h
+    clock.h \
+    camera.h \
+    sphere.h
 
 SOURCES += glbox.cpp \
            main.cpp \
            MainWindow.cpp \    
-    clock.cpp
+    clock.cpp \
+    camera.cpp \
+    sphere.cpp
 
 INCLUDEPATH += . ui /usr/include /usr/local/include
 
@@ -39,6 +43,14 @@ TEMPLATE = app
 
 #The following line was inserted by qt3to4
 QT +=  opengl 
+
+
+
+
+
+
+
+
 
 
 

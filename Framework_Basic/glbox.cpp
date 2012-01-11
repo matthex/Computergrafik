@@ -15,7 +15,7 @@
 #include "matrix.h"
 
 GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
-	: QGLWidget( parent,  shareWidget )
+        : QGLWidget( parent,  shareWidget )
 {
     scale = 1.0;
     m_texID = 0;
@@ -34,8 +34,14 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     m_clock = Clock(TEX_HALF_X, TEX_HALF_Y, Vec3d(50,50,1), 50, Vec3d(-0.5,-0.9,1));
     m_elapsed = 0;
     m_focus = 1;
-    //Initialize the cuboids
+    m_cam = Camera();
+    //Initialize the cuboids and spheres
     initializeCuboids();
+    m_sphere1 = sphere(Color(1,0,0), Vec4d(0.1,0.2,0.5,1), 0.1);
+    m_sphere2 = sphere(Color(0,1,0), Vec4d(0,0,0,1), 0.3);
+    angle2 = 0.1;
+    sphereRotAxis = Vec4d(-1,0.5,0,1);
+    sphereRotAxis = sphereRotAxis.normH();
 }
 
 
@@ -85,7 +91,7 @@ void GLBox::setPoint(Point2D p, Color c)
     int y = p.y + TEX_HALF_Y;
     if (x < 0 || y < 0 || x >= TEX_RES_X || y >= TEX_RES_Y)
     {
-        qDebug() << "Illegal point coordinates (" << p.x << "," << p.y << ")";
+        //qDebug() << "Illegal point coordinates (" << p.x << "," << p.y << ")";
         return;
     }
 
@@ -243,6 +249,7 @@ void GLBox::resizeGL(int w, int h)
     glLoadIdentity();
     glOrtho(-w/2, w/2, -h/2, h/2, 0, 1);
 
+//    raycast();
     updateGL();
 }
 
@@ -251,23 +258,24 @@ void GLBox::paintGL()
     // this method draws the scene into the OpenGL widget
     // usually you do not call this method directly, instead call updateGL(), which in turn calls paintGL()
 
-    clearImage(Color(1.0, 1.0, 1.0));
+//    clearImage(Color(1.0, 1.0, 1.0));
 
-    Color black(0.0, 0.0, 0.0);
-    Color grey(0.3, 0.3, 0.3);
+//    Color black(0.0, 0.0, 0.0);
+//    Color grey(0.3, 0.3, 0.3);
 
-    //Clock
-//    bresenhamCircle(m_clock.getCenter(), m_clock.getRadius(), black);
-//    bresenhamLine(m_clock.getCenter(), m_clock.getLonghand(), black);
-//    bresenhamLine(m_clock.getCenter(), m_clock.getShorthand(), grey);
+//    //Clock
+////    bresenhamCircle(m_clock.getCenter(), m_clock.getRadius(), black);
+////    bresenhamLine(m_clock.getCenter(), m_clock.getLonghand(), black);
+////    bresenhamLine(m_clock.getCenter(), m_clock.getShorthand(), grey);
 
+//    //Cuboids
+//    makeCuboid(m_cub1);
+//    makeCuboid(m_cub2);
+//    makeCuboid(m_cub3);
 
-
-
-    //Cuboids
-    makeCuboid(m_cub1);
-    makeCuboid(m_cub2);
-    makeCuboid(m_cub3);
+//    //Spheres
+//    makeSphere(m_sphere1);
+//    makeSphere(m_sphere2);
 
     //-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-\\
 
@@ -302,16 +310,20 @@ void GLBox::animate()
     //m_clock.update(m_elapsed);
 
     //Animate cuboids
-    transVec = Vec4d(0.001,-0.003,0.002,1);
-    rotAxis = Vec4d(1,1,1,1);
-    angle1 = M_PI/12;
-    for(int i=0; i<8; i++)
-    {
-        m_cub1[i] = cubTransMat.makeTransMat(transVec)*m_cub1[i];
-        //m_cub2[i] = cubRotMat.makeRotMat(angle1,rotAxis)*m_cub2[i]; //nur normale oder Punktrotation!
-        m_cub1[i] = cubRotMat.makeRotMatPoint(angle1,rotAxis,m_cub1[1])*m_cub1[i];
-    }
+//    transVec = Vec4d(-0.003,0.002,0.002,1);
+//    rotAxis = Vec4d(1,1,1,1);
+//    angle1 = M_PI/12;
+//    for(int i=0; i<8; i++)
+//    {
+//        m_cub3[i] = cubTransMat.makeTransMat(transVec)*m_cub3[i];
+//        //m_cub2[i] = cubRotMat.makeRotMat(angle1,rotAxis)*m_cub2[i]; //nur normale oder Punktrotation!
+//        m_cub1[i] = cubRotMat.makeRotMatPoint(angle1,rotAxis,m_cub1[1])*m_cub1[i];
+//    }
 
+    //Animate spheres
+    m_sphere1.setCenter(sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis, m_sphere2.getCenter()) * m_sphere1.getCenter());
+
+    raycast();
     updateGL();
 }
 
@@ -350,12 +362,19 @@ void GLBox::mouseMoveEvent( QMouseEvent *e )
     {
         double dist = sqrt(dx*dx + dy*dy);
         Vec4d axis(dy, dx, 4.0*(ry*dx - rx*dy), 0.0);
+
+        Mat4d camRot;
+        m_cam.setEyePoint(camRot.makeRotMatPoint(dist,axis,Vec4d(0,0,0,1))*m_cam.getEyePoint());
+        m_cam.setViewVec(Vec4d(-m_cam.getEyePoint()(0),-m_cam.getEyePoint()(1),-m_cam.getEyePoint()(2),1));
     }
 
     // check for right mouse button => translation
     if ((state & Qt::RightButton) != 0)
     {
         Vec4d trans(-dx*1.5*scale, dy*1.5*scale, 0.0, 0.0);
+
+        Mat4d camTrans;
+        m_cam.setEyePoint(camTrans.makeTransMat(trans)*m_cam.getEyePoint());
     }
 
     // repaint the scene
@@ -371,7 +390,15 @@ void GLBox::wheelEvent (QWheelEvent *e)
 {
     // turning the mouse wheel will change the scale and therefore zoom in and out
     double dist = e->delta() / 120.0;  // one wheel "tick" counts for 120
-    //scale *= exp (dist * log (1.05));
+    scale *= exp (dist * log (1.05));
+
+    Vec4d tempVec2 = tempVec;
+    tempVec(0) = scale*m_cam.getViewVec()(0)-m_cam.getViewVec()(0);
+    tempVec(1) = scale*m_cam.getViewVec()(1)-m_cam.getViewVec()(1);
+    tempVec(2) = scale*m_cam.getViewVec()(2)-m_cam.getViewVec()(2);
+    tempVec(3) = 1;
+    m_cam.setEyePoint(m_cam.getEyePoint()+tempVec-tempVec2);
+
     updateGL();
 }
 
@@ -414,25 +441,25 @@ void GLBox::initializeCuboids()
     Vec4d cub1p5;
     cub1p5(0) = -0.4;
     cub1p5(1) = 0.2;
-    cub1p5(2) = 0.3;
+    cub1p5(2) = -0.3;
     cub1p5(3) = 1.0;
     m_cub1[4] = cub1p5;
     Vec4d cub1p6;
     cub1p6(0) = 0.5;
     cub1p6(1) = 0.2;
-    cub1p6(2) = 0.3;
+    cub1p6(2) = -0.3;
     cub1p6(3) = 1.0;
     m_cub1[5] = cub1p6;
     Vec4d cub1p7;
     cub1p7(0) = 0.5;
     cub1p7(1) = 0.6;
-    cub1p7(2) = 0.3;
+    cub1p7(2) = -0.3;
     cub1p7(3) = 1.0;
     m_cub1[6] = cub1p7;
     Vec4d cub1p8;
     cub1p8(0) = -0.4;
     cub1p8(1) = 0.6;
-    cub1p8(2) = 0.3;
+    cub1p8(2) = -0.3;
     cub1p8(3) = 1.0;
     m_cub1[7] = cub1p8;
 
@@ -440,25 +467,25 @@ void GLBox::initializeCuboids()
     Vec4d cub2p1;
     cub2p1(0) = 0.7;
     cub2p1(1) = 0.2;
-    cub2p1(2) = 0.8;
+    cub2p1(2) = -0.8;
     cub2p1(3) = 1.0;
     m_cub2[0] = cub2p1;
     Vec4d cub2p2;
     cub2p2(0) = 0.5;
     cub2p2(1) = 0.2;
-    cub2p2(2) = 0.8;
+    cub2p2(2) = -0.8;
     cub2p2(3) = 1.0;
     m_cub2[1] = cub2p2;
     Vec4d cub2p3;
     cub2p3(0) = 0.5;
     cub2p3(1) = -0.4;
-    cub2p3(2) = 0.8;
+    cub2p3(2) = -0.8;
     cub2p3(3) = 1.0;
     m_cub2[2] = cub2p3;
     Vec4d cub2p4;
     cub2p4(0) = 0.7;
     cub2p4(1) = -0.4;
-    cub2p4(2) = 0.8;
+    cub2p4(2) = -0.8;
     cub2p4(3) = 1.0;
     m_cub2[3] = cub2p4;
     Vec4d cub2p5;
@@ -540,8 +567,6 @@ void GLBox::initializeCuboids()
 void GLBox::makeCuboid(Vec4d cub[8])
 {
     Color black(0.0, 0.0, 0.0);
-    Vec3d cub2[8];
-    Vec4d projectedVec;
 
     //Calculate actual points
     for(int i=0; i<8; i++)
@@ -571,6 +596,11 @@ Vec4d GLBox::projectZ(Vec4d &vec, double focus)
 {
     if(focus==0) return Vec4d();
 
+    //Camera
+    Mat4d camMat = m_cam.makeTransMat();
+    Vec4d camVec;
+    camVec = camMat*vec;
+
     Mat4d projectMat;
     projectMat(0,0) = 1;
     projectMat(1,1) = 1;
@@ -578,7 +608,7 @@ Vec4d GLBox::projectZ(Vec4d &vec, double focus)
     projectMat(3,2) = -1/focus;
 
     Vec4d projectVec;
-    projectVec = projectMat*vec;
+    projectVec = projectMat*camVec;
 
     //Normalize
     for(int i=0; i<4; i++)
@@ -592,10 +622,62 @@ Vec4d GLBox::projectZ(Vec4d &vec, double focus)
 void GLBox::setFocus(double focus)
 {
     m_focus = focus;
+    raycast();
     updateGL();
 }
 
 double GLBox::getFocus()
 {
     return m_focus;
+}
+
+void GLBox::makeSphere(sphere sphere)
+{
+    Vec3d tempVec[sphere.points.size()];
+
+    for (int i=0; i<sphere.points.size(); i++)
+    {
+        projectedVec = projectZ(sphere.points[i], m_focus);
+        tempVec[i](0) = projectedVec(0)*double(TEX_HALF_X) + sphere.getCenter()(0);
+        tempVec[i](1) = projectedVec(1)*double(TEX_HALF_Y) + sphere.getCenter()(1);
+        tempVec[i](2) = projectedVec(2);
+    }
+
+    for(int i=0; i<sphere.points.size(); i++)
+    {
+        setPoint(Point2D(int(tempVec[i](0)), int(tempVec[i](1))), sphere.getColor());
+    }
+}
+
+void GLBox::raycast()
+{
+    clearImage(Color(1.0, 1.0, 1.0));
+    Vec3d eye(0, 0, m_focus);
+    Vec3d pixel;
+    Vec3d view;
+    double x_min = -1;
+    double x_max = 1;
+    double y_min = -1;
+    double y_max = 1;
+    for(int x = 0; x < TEX_RES_X; x++)
+    {
+        for(int y = 0; y < TEX_RES_Y; y++)
+        {
+            pixel(0) = x_min + x * ((x_max - x_min) / (double) TEX_RES_X);
+            pixel(1) = y_min + y * ((y_max - y_min) / (double) TEX_RES_Y);
+            pixel(2) = 0;
+            view = pixel - eye;
+            view = view.norm();
+            Vec3d s1 = m_sphere1.intersect(eye, view);
+            Vec3d s2 = m_sphere2.intersect(eye, view);
+            if(s1(2)>s2(2))
+            {
+                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), m_sphere1.getColor());    //Draw Sphere 1
+            }
+            if(s2(2)>s1(2))
+            {
+                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), m_sphere2.getColor());    //Draw Sphere 2
+            }
+        }
+    }
 }
