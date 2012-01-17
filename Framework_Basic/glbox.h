@@ -119,6 +119,9 @@ protected:
     // Ray casting
     void raycast();
 
+    // Sort hit points
+    void sortHits(std::vector<Vec3d> &hits, std::vector<int> &indices);
+
 
 private:
     double scale;   // zoom factor
@@ -153,14 +156,29 @@ private:
 
     Camera m_cam;
 
+    int m_sphereCount;
     sphere m_sphere1;
     sphere m_sphere2;
+    sphere m_sphere3;
+    sphere m_sphere4;
+    sphere m_sphere5;
+    sphere m_sphere6;
 
     Mat4d sphereTransMat;
+
     double angle2;
+
     Vec4d sphereRotAxis;
+    Vec4d sphereRotAxis2;
+    Vec4d sphereRotAxis3;
+    Vec4d sphereRotAxis4;
+    Vec4d sphereRotAxis5;
+    Vec4d sphereRotAxis6;
 
     Vec4d tempVec;
+
+    std::vector<sphere*> m_spheres;
+    std::vector<Mat4d> m_matrices;
 };
 
 #endif // _GLBOX_H_

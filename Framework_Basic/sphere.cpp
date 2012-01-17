@@ -29,33 +29,38 @@ Vec3d sphere::intersect(Vec3d eye, Vec3d view)
     double b = view * (eye - getCenter3()) * 2;
     double c = (eye - getCenter3()) * (eye - getCenter3()) - m_radius * m_radius;
 
-    double t1 = (-b + sqrt(b*b - 4*a*c)) / 2*a;     // abc formula
-    double t2 = (-b - sqrt(b*b - 4*a*c)) / 2*a;
+    double det = b*b - 4*a*c;
 
-    Vec3d s1 = eye + view*t1;
-    Vec3d s2 = eye + view*t2;
+    if (det>=0){
+        double t1 = (-b + sqrt(det)) / 2*a;     // abc formula
+        double t2 = (-b - sqrt(det)) / 2*a;
 
-    if(t1>0 || t2>0)
-    {
-        if(t1>0 && t2>0 && s1(2)>s2(2))
+        Vec3d s1 = eye + view*t1;
+        Vec3d s2 = eye + view*t2;
+
+        if(t1>0 || t2>0)
         {
-            return s1;
-        }
-        else
-        {
-            return s2;
-        }
-        if(t1>0)
-        {
-            return s1;
-        }
-        else
-        {
-            return s2;
+            if(t1>0 && t2>0 && s1(2)>s2(2))
+            {
+                return s1;
+            }
+            else
+            {
+                return s2;
+            }
+            if(t1>0)
+            {
+                return s1;
+            }
+            else
+            {
+                return s2;
+            }
         }
     }
     return Vec3d(0,0,-INFINITY);
 }
+
 
 Vec4d sphere::getCenter()
 {

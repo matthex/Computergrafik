@@ -36,17 +36,41 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     m_focus = 1;
     m_cam = Camera();
     //Initialize the cuboids and spheres
-    initializeCuboids();
-    m_sphere1 = sphere(Color(1,0,0), Vec4d(0.1,0.2,0.5,1), 0.1);
-    m_sphere2 = sphere(Color(0,1,0), Vec4d(0,0,0,1), 0.3);
+    //initializeCuboids();
+    m_sphereCount = 7;
+    m_spheres.resize(m_sphereCount);
+    m_spheres[0] = new sphere(Color(1,1,0), Vec4d(0,0,0,1), 0.15);
+        m_spheres[1] = new sphere(Color(0,1,0), Vec4d(0.5,0,0,1), 0.1);
+            m_spheres[2] = new sphere(Color(0,0.8,0), Vec4d(0.7,0,0,1), 0.05);
+        m_spheres[3] = new sphere(Color(0,1,1), Vec4d(-0.2,-0.2,-0.2,1), 0.1);
+            m_spheres[4] = new sphere(Color(0,0.8,0.8), Vec4d(-0.4,-0.2,-0.2,1), 0.05);
+            m_spheres[5] = new sphere(Color(0,0.7,0.7), Vec4d(-0.3,-0.6,-0.3,1), 0.05);
+                m_spheres[6] = new sphere(Color(0,0.5,0.5), Vec4d(-0.2,-0.5,-0.2,1), 0.01);
+
     angle2 = 0.1;
-    sphereRotAxis = Vec4d(-1,0.5,0,1);
+    sphereRotAxis = Vec4d(0,-1,1,1);
     sphereRotAxis = sphereRotAxis.normH();
+    sphereRotAxis2 = Vec4d(0,-1,-0.5,1);
+    sphereRotAxis2 = sphereRotAxis2.normH();
+    sphereRotAxis3 = Vec4d(1,-1,2,1);
+    sphereRotAxis3 = sphereRotAxis3.normH();
+    sphereRotAxis4 = Vec4d(0,-0.5,0.1,1);
+    sphereRotAxis4 = sphereRotAxis4.normH();
+    sphereRotAxis5 = Vec4d(-0.6,0.1,0.2,1);
+    sphereRotAxis5 = sphereRotAxis5.normH();
+    sphereRotAxis6 = Vec4d(0.1,-0.2,0.1,1);
+    sphereRotAxis6 = sphereRotAxis5.normH();
+
+    m_matrices.resize(m_sphereCount);
 }
 
 
 GLBox::~GLBox()
 {
+    for(int i=0; i<m_spheres.size(); i++)
+    {
+        delete m_spheres[i];
+    }
     delete [] m_buffer;
     m_buffer = NULL;
 }
@@ -221,7 +245,6 @@ void GLBox::bresenhamCircle(Vec3d center, int radius, Color color)
     }
 }
 
-
 void GLBox::initializeGL()
 {
     // this method is called exactly once on program start
@@ -236,7 +259,6 @@ void GLBox::initializeGL()
     glClear (GL_COLOR_BUFFER_BIT);
 
 }
-
 
 void GLBox::resizeGL(int w, int h)
 {
@@ -321,7 +343,29 @@ void GLBox::animate()
 //    }
 
     //Animate spheres
-    m_sphere1.setCenter(sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis, m_sphere2.getCenter()) * m_sphere1.getCenter());
+    m_matrices[1] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis, m_spheres[0]->getCenter());
+    m_matrices[3] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis3, m_spheres[0]->getCenter());
+
+    m_spheres[1]->setCenter(m_matrices[1] * m_spheres[1]->getCenter());
+
+    m_spheres[2]->setCenter(m_matrices[1] * m_spheres[2]->getCenter());
+    m_matrices[2] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis2, m_spheres[1]->getCenter());
+    m_spheres[2]->setCenter(m_matrices[2] * m_spheres[2]->getCenter());
+
+    m_spheres[3]->setCenter(m_matrices[3] * m_spheres[3]->getCenter());
+
+    m_spheres[4]->setCenter(m_matrices[3] * m_spheres[4]->getCenter());
+    m_matrices[4] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis4, m_spheres[3]->getCenter());
+    m_spheres[4]->setCenter(m_matrices[4] * m_spheres[4]->getCenter());
+
+    m_spheres[5]->setCenter(m_matrices[3] * m_spheres[5]->getCenter());
+    m_matrices[5] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis5, m_spheres[3]->getCenter());
+    m_spheres[5]->setCenter(m_matrices[5] * m_spheres[5]->getCenter());
+
+    m_spheres[6]->setCenter(m_matrices[3] * m_spheres[6]->getCenter());
+    m_spheres[6]->setCenter(m_matrices[5] * m_spheres[6]->getCenter());
+    m_matrices[6] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis6, m_spheres[5]->getCenter());
+    m_spheres[6]->setCenter(m_matrices[6] * m_spheres[6]->getCenter());
 
     raycast();
     updateGL();
@@ -649,6 +693,38 @@ void GLBox::makeSphere(sphere sphere)
     }
 }
 
+void GLBox::sortHits(std::vector<Vec3d> &hits, std::vector<int> &indices)
+{
+    //Bubble sort
+    bool swapped = true;
+    int temp;
+    Vec3d temp2;
+
+    int j=0;
+
+    while (swapped)
+    {
+        swapped = false;
+        j++;
+
+        for(int i=0; i<hits.size()-j; i++)
+        {
+            if(hits[i](2) < hits[i+1](2))
+            {
+                temp = indices[i];
+                indices[i] = indices[i+1];
+                indices[i+1] = temp;
+
+                temp2 = hits[i];
+                hits[i] = hits[i+1];
+                hits[i+1] = temp2;
+
+                swapped = true;
+            }
+        }
+    }
+}
+
 void GLBox::raycast()
 {
     clearImage(Color(1.0, 1.0, 1.0));
@@ -668,16 +744,34 @@ void GLBox::raycast()
             pixel(2) = 0;
             view = pixel - eye;
             view = view.norm();
-            Vec3d s1 = m_sphere1.intersect(eye, view);
-            Vec3d s2 = m_sphere2.intersect(eye, view);
-            if(s1(2)>s2(2))
+
+            std::vector<Vec3d> hits(m_sphereCount);
+            std::vector<int> indices(m_sphereCount);
+
+            for(int i=0; i<m_sphereCount; i++)
             {
-                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), m_sphere1.getColor());    //Draw Sphere 1
+                sphere *curSph = m_spheres[i];
+                hits[i] = curSph->intersect(eye, view);
+                indices[i] = i;
             }
-            if(s2(2)>s1(2))
+
+            sortHits(hits, indices);
+            if(hits[0](2)!=-INFINITY)
             {
-                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), m_sphere2.getColor());    //Draw Sphere 2
+                sphere *curSph = m_spheres[indices[0]];
+                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), curSph->getColor());
             }
+
+//            Vec3d s1 = m_sphere1.intersect(eye, view);
+//            Vec3d s2 = m_sphere2.intersect(eye, view);
+//            if(s1(2)>s2(2))
+//            {
+//                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), m_sphere1.getColor());    //Draw Sphere 1
+//            }
+//            if(s2(2)>s1(2))
+//            {
+//                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), m_sphere2.getColor());    //Draw Sphere 2
+//            }
         }
     }
 }
