@@ -37,31 +37,35 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     m_cam = Camera();
     //Initialize the cuboids and spheres
     //initializeCuboids();
-    m_sphereCount = 7;
+    m_sphereCount = 2;
     m_spheres.resize(m_sphereCount);
-    m_spheres[0] = new sphere(Color(1,1,0), Vec4d(0,0,0,1), 0.15);
-        m_spheres[1] = new sphere(Color(0,1,0), Vec4d(0.5,0,0,1), 0.1);
-            m_spheres[2] = new sphere(Color(0,0.8,0), Vec4d(0.7,0,0,1), 0.05);
-        m_spheres[3] = new sphere(Color(0,1,1), Vec4d(-0.2,-0.2,-0.2,1), 0.1);
-            m_spheres[4] = new sphere(Color(0,0.8,0.8), Vec4d(-0.4,-0.2,-0.2,1), 0.05);
-            m_spheres[5] = new sphere(Color(0,0.7,0.7), Vec4d(-0.3,-0.6,-0.3,1), 0.05);
-                m_spheres[6] = new sphere(Color(0,0.5,0.5), Vec4d(-0.2,-0.5,-0.2,1), 0.01);
+    m_spheres[0] = new sphere(Material(Vec3d(0.1,0.9,0), Vec3d(0.5,0,0.1), Vec3d(0.3,0.5,0.1), 0.8), Vec4d(0,0,0,1), 0.15);
+        m_spheres[1] = new sphere(Material(Vec3d(0.5,0.5,0.2), Vec3d(0.3,0.6,0.7), Vec3d(0.2,0.4,1.2), 888.8), Vec4d(0.5,0,0,1), 0.1);
+//            m_spheres[2] = new sphere(Color(0,0.8,0), Vec4d(0.7,0,0,1), 0.05);
+//        m_spheres[3] = new sphere(Color(0,1,1), Vec4d(-0.2,-0.2,-0.2,1), 0.1);
+//            m_spheres[4] = new sphere(Color(0,0.8,0.8), Vec4d(-0.4,-0.2,-0.2,1), 0.05);
+//            m_spheres[5] = new sphere(Color(0,0.7,0.7), Vec4d(-0.3,-0.6,-0.3,1), 0.05);
+//                m_spheres[6] = new sphere(Color(0,0.5,0.5), Vec4d(-0.2,-0.5,-0.2,1), 0.01);
 
     angle2 = 0.1;
     sphereRotAxis = Vec4d(0,-1,1,1);
     sphereRotAxis = sphereRotAxis.normH();
-    sphereRotAxis2 = Vec4d(0,-1,-0.5,1);
-    sphereRotAxis2 = sphereRotAxis2.normH();
-    sphereRotAxis3 = Vec4d(1,-1,2,1);
-    sphereRotAxis3 = sphereRotAxis3.normH();
-    sphereRotAxis4 = Vec4d(0,-0.5,0.1,1);
-    sphereRotAxis4 = sphereRotAxis4.normH();
-    sphereRotAxis5 = Vec4d(-0.6,0.1,0.2,1);
-    sphereRotAxis5 = sphereRotAxis5.normH();
-    sphereRotAxis6 = Vec4d(0.1,-0.2,0.1,1);
-    sphereRotAxis6 = sphereRotAxis5.normH();
+//    sphereRotAxis2 = Vec4d(0,-1,-0.5,1);
+//    sphereRotAxis2 = sphereRotAxis2.normH();
+//    sphereRotAxis3 = Vec4d(1,-1,2,1);
+//    sphereRotAxis3 = sphereRotAxis3.normH();
+//    sphereRotAxis4 = Vec4d(0,-0.5,0.1,1);
+//    sphereRotAxis4 = sphereRotAxis4.normH();
+//    sphereRotAxis5 = Vec4d(-0.6,0.1,0.2,1);
+//    sphereRotAxis5 = sphereRotAxis5.normH();
+//    sphereRotAxis6 = Vec4d(0.1,-0.2,0.1,1);
+//    sphereRotAxis6 = sphereRotAxis5.normH();
 
     m_matrices.resize(m_sphereCount);
+
+    m_light = Light(Vec3d(0.4,0.5,-0.1), Vec3d(0.5,0.7,0.2), Vec3d(0.2,0.1,0.6));
+
+    //loadTexture("land_shallow_topo_350.jpg");
 }
 
 
@@ -344,28 +348,28 @@ void GLBox::animate()
 
     //Animate spheres
     m_matrices[1] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis, m_spheres[0]->getCenter());
-    m_matrices[3] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis3, m_spheres[0]->getCenter());
+//    m_matrices[3] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis3, m_spheres[0]->getCenter());
 
     m_spheres[1]->setCenter(m_matrices[1] * m_spheres[1]->getCenter());
 
-    m_spheres[2]->setCenter(m_matrices[1] * m_spheres[2]->getCenter());
-    m_matrices[2] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis2, m_spheres[1]->getCenter());
-    m_spheres[2]->setCenter(m_matrices[2] * m_spheres[2]->getCenter());
+//    m_spheres[2]->setCenter(m_matrices[1] * m_spheres[2]->getCenter());
+//    m_matrices[2] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis2, m_spheres[1]->getCenter());
+//    m_spheres[2]->setCenter(m_matrices[2] * m_spheres[2]->getCenter());
 
-    m_spheres[3]->setCenter(m_matrices[3] * m_spheres[3]->getCenter());
+//    m_spheres[3]->setCenter(m_matrices[3] * m_spheres[3]->getCenter());
 
-    m_spheres[4]->setCenter(m_matrices[3] * m_spheres[4]->getCenter());
-    m_matrices[4] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis4, m_spheres[3]->getCenter());
-    m_spheres[4]->setCenter(m_matrices[4] * m_spheres[4]->getCenter());
+//    m_spheres[4]->setCenter(m_matrices[3] * m_spheres[4]->getCenter());
+//    m_matrices[4] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis4, m_spheres[3]->getCenter());
+//    m_spheres[4]->setCenter(m_matrices[4] * m_spheres[4]->getCenter());
 
-    m_spheres[5]->setCenter(m_matrices[3] * m_spheres[5]->getCenter());
-    m_matrices[5] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis5, m_spheres[3]->getCenter());
-    m_spheres[5]->setCenter(m_matrices[5] * m_spheres[5]->getCenter());
+//    m_spheres[5]->setCenter(m_matrices[3] * m_spheres[5]->getCenter());
+//    m_matrices[5] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis5, m_spheres[3]->getCenter());
+//    m_spheres[5]->setCenter(m_matrices[5] * m_spheres[5]->getCenter());
 
-    m_spheres[6]->setCenter(m_matrices[3] * m_spheres[6]->getCenter());
-    m_spheres[6]->setCenter(m_matrices[5] * m_spheres[6]->getCenter());
-    m_matrices[6] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis6, m_spheres[5]->getCenter());
-    m_spheres[6]->setCenter(m_matrices[6] * m_spheres[6]->getCenter());
+//    m_spheres[6]->setCenter(m_matrices[3] * m_spheres[6]->getCenter());
+//    m_spheres[6]->setCenter(m_matrices[5] * m_spheres[6]->getCenter());
+//    m_matrices[6] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis6, m_spheres[5]->getCenter());
+//    m_spheres[6]->setCenter(m_matrices[6] * m_spheres[6]->getCenter());
 
     raycast();
     updateGL();
@@ -756,22 +760,128 @@ void GLBox::raycast()
             }
 
             sortHits(hits, indices);
+
             if(hits[0](2)!=-INFINITY)
             {
-                sphere *curSph = m_spheres[indices[0]];
-                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), curSph->getColor());
+                if(isShadowed(m_spheres[indices[0]], hits[0], m_light))
+                {
+                    Vec3d ambientLight = m_light.getAmbient();
+                    Vec3d ambientSphere = m_spheres[indices[0]]->getMaterial().getAmbient();
+                    Vec3d ambient = ambientLight & ambientSphere;
+                    Color color;
+                    color.r = ambient(0);
+                    color.g = ambient(1);
+                    color.b = ambient(2);
+                    setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), color);
+                }
+                else
+                {
+                    Vec3d normal = hits[0] - m_spheres[indices[0]]->getCenter3();
+                    normal = normal.norm();
+                    setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), phong(hits[0], eye, normal, m_light, m_spheres[indices[0]]->getMaterial()));
+                }
             }
-
-//            Vec3d s1 = m_sphere1.intersect(eye, view);
-//            Vec3d s2 = m_sphere2.intersect(eye, view);
-//            if(s1(2)>s2(2))
-//            {
-//                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), m_sphere1.getColor());    //Draw Sphere 1
-//            }
-//            if(s2(2)>s1(2))
-//            {
-//                setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), m_sphere2.getColor());    //Draw Sphere 2
-//            }
         }
     }
+}
+
+Color GLBox::phong(Vec3d hit, Vec3d eyePos, Vec3d normal, Light light, Material Material)
+{
+    Vec3d color = Vec3d(0,0,0);
+
+    //Light ray (L)
+    Vec3d lightRay = light.getPosition() - hit;
+    lightRay.norm();
+
+    //Diffuse light
+    double diffuse = normal * lightRay;
+    if(diffuse<0)
+    {
+        diffuse = 0;
+    }
+
+    //Specular light
+    //Blinn-Phong
+//    Vec3d halfway = lightRay + eyePos;    //halfway = H
+//    for(int i=0; i<3; i++) { halfway(i) = halfway(i)/2; }
+//    double specular = normal * halfway;
+    Vec3d reflec = normal * (normal * lightRay) * 2 - lightRay;    //reflect = R
+    double specular = reflec * eyePos;
+    if(specular<0)
+    {
+        specular = 0;
+    }
+
+    //Ambient light
+    Vec3d ambient = Material.getAmbient();
+
+
+    //Addition of lights to color vector
+    color += (Material.getDiffuse() & light.getLightColor()) * diffuse;
+
+    color += (Material.getSpecular() & light.getLightColor()) * (double) pow((double) specular, Material.getShininess());
+
+    color += ambient;
+
+
+    for(int i=0; i<3; i++){
+        if(color(i) > 1)
+            color(i) = 1;
+    }
+
+    Color color2;
+    color2.r = color(0);
+    color2.g = color(1);
+    color2.b = color(2);
+
+    return color2;
+}
+
+bool GLBox::isShadowed(sphere *sphere, Vec3d hit, Light light)
+{
+    //Light ray (L)
+    Vec3d lightRay = light.getPosition() - hit;
+    lightRay.norm();
+
+    for(int i=0; i<m_sphereCount; i++)
+    {
+        if(m_spheres[i] != sphere)
+        {
+            Vec3d intersect = m_spheres[i]->intersect(hit, lightRay);
+            if(intersect(2) != -INFINITY)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void GLBox::loadTexture(QString filename)
+{
+    if(!m_texture.load(filename))
+    {
+        qDebug() << "Loading image " << filename << " failed";
+        return;
+    }
+}
+
+Color GLBox::getTextureValue(double phi, double theta)
+{
+    if(phi < -M_PI || phi > M_PI)
+    {
+        qDebug() << "phi = " << phi << " out of scope!";
+        return Color();
+    }
+    if(theta < 0.0 || theta > M_PI)
+    {
+        qDebug() << "theta = " << theta << " out of scope!";
+        return Color();
+    }
+
+    int u_tex = 0;
+    int v_tex = 0;
+    QRgb color = m_texture.pixel(u_tex, v_tex);
+    Color result(qRed(color)/255.0, qGreen(color)/255.0, qBlue(color)/255.0);
+    return result;
 }

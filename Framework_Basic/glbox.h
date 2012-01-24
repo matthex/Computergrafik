@@ -24,10 +24,12 @@
 #include "clock.h"
 #include "camera.h"
 #include "sphere.h"
+#include "light.h"
+#include <QImage>
 
 // Texture resolution
-#define TEX_RES_X 200
-#define TEX_RES_Y 200
+#define TEX_RES_X 400
+#define TEX_RES_Y 400
 
 // Number of pixels in the texture
 #define TEX_RES TEX_RES_X*TEX_RES_Y
@@ -122,6 +124,19 @@ protected:
     // Sort hit points
     void sortHits(std::vector<Vec3d> &hits, std::vector<int> &indices);
 
+    // Phong shading
+    Color phong(Vec3d hit, Vec3d eyePos, Vec3d normal, Light light, Material Material);
+
+    // Shadow sensor
+    bool isShadowed(sphere *sphere, Vec3d hit, Light light);
+
+    // Load texture
+    void loadTexture(QString filename);
+
+    // Get texture color
+    Color getTextureValue (double phi, double theta);
+
+
 
 private:
     double scale;   // zoom factor
@@ -179,6 +194,10 @@ private:
 
     std::vector<sphere*> m_spheres;
     std::vector<Mat4d> m_matrices;
+
+    Light m_light;
+
+    QImage m_texture;
 };
 
 #endif // _GLBOX_H_

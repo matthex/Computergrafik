@@ -14,14 +14,18 @@ HEADERS += \
     matrix.h \
     clock.h \
     camera.h \
-    sphere.h
+    sphere.h \
+    light.h \
+    material.h
 
 SOURCES += glbox.cpp \
            main.cpp \
            MainWindow.cpp \    
     clock.cpp \
     camera.cpp \
-    sphere.cpp
+    sphere.cpp \
+    light.cpp \
+    material.cpp
 
 INCLUDEPATH += . ui /usr/include /usr/local/include
 
@@ -43,6 +47,10 @@ TEMPLATE = app
 
 #The following line was inserted by qt3to4
 QT +=  opengl 
+
+
+
+
 
 
 

@@ -290,6 +290,15 @@ public:
         return vec;
     }
 
+    // Multiplication of components pairwise
+    Vector<T, SIZE> operator &(const Vector<T, SIZE> &vec)
+    {
+        Vector<T, SIZE> temp;
+        for(unsigned int i = 0; i < SIZE; i++)
+            temp(i) = m_data[i] * vec.m_data[i];
+        return temp;
+    }
+
 private:
     T m_data[SIZE];
 };

@@ -23,6 +23,13 @@ sphere::sphere(Color color, Vec4d center, double radius)
         }
 }
 
+sphere::sphere(Material material, Vec4d center, double radius)
+{
+    m_material = material;
+    m_center = center;
+    m_radius = radius;
+}
+
 Vec3d sphere::intersect(Vec3d eye, Vec3d view)
 {
     double a = view * view;
@@ -84,4 +91,9 @@ void sphere::setCenter(Vec4d center)
 Color sphere::getColor()
 {
     return m_color;
+}
+
+Material sphere::getMaterial()
+{
+    return m_material;
 }
