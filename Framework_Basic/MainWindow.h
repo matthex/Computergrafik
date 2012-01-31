@@ -29,6 +29,7 @@ class MainWindow : public QMainWindow
         // this slot processes the selection of the menu entry "Exit"
         void fileExit();
         void changeFocus(int focus);
+        void changePhi(int phi);
 
     private:
         GLBox *glbox;

@@ -18,6 +18,8 @@ public:
 
     double getShininess();
 
+    void setDiffuse(Vec3d diffuse);
+
 private:
     Vec3d m_diffuse;
     Vec3d m_specular;

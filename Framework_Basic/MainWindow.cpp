@@ -30,7 +30,7 @@ MainWindow::MainWindow (QWidget *parent, const char *name)
     focusSlider = new QSlider(Qt::Horizontal, this);
     focusSlider->setMinimum(1);
     focusSlider->setValue(glbox->getFocus());
-    connect(focusSlider, SIGNAL(valueChanged(int)), this, SLOT(changeFocus(int)));
+    connect(focusSlider, SIGNAL(valueChanged(int)), this, SLOT(changePhi(int)));
     sliderLayout->addWidget(focusSlider);
 }
 
@@ -47,4 +47,9 @@ void MainWindow::fileExit()
 void MainWindow::changeFocus(int focus)
 {
     glbox->setFocus((double)focus);
+}
+
+void MainWindow::changePhi(int phi)
+{
+    glbox->setPhiRot(phi);
 }

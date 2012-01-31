@@ -33,14 +33,14 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
     //Set the clock
     m_clock = Clock(TEX_HALF_X, TEX_HALF_Y, Vec3d(50,50,1), 50, Vec3d(-0.5,-0.9,1));
     m_elapsed = 0;
-    m_focus = 1;
+    m_focus = 1000;
     m_cam = Camera();
     //Initialize the cuboids and spheres
     //initializeCuboids();
-    m_sphereCount = 2;
+    m_sphereCount = 1;
     m_spheres.resize(m_sphereCount);
-    m_spheres[0] = new sphere(Material(Vec3d(0.1,0.9,0), Vec3d(0.5,0,0.1), Vec3d(0.3,0.5,0.1), 0.8), Vec4d(0,0,0,1), 0.15);
-        m_spheres[1] = new sphere(Material(Vec3d(0.5,0.5,0.2), Vec3d(0.3,0.6,0.7), Vec3d(0.2,0.4,1.2), 888.8), Vec4d(0.5,0,0,1), 0.1);
+    m_spheres[0] = new sphere(Material(Vec3d(0.1,0.9,0), Vec3d(0.5,0,0.1), Vec3d(0.3,0.5,0.1), 0.0), Vec4d(0,0,0,1), 0.65);
+//        m_spheres[1] = new sphere(Material(Vec3d(0.5,0.5,0.2), Vec3d(0.3,0.6,0.7), Vec3d(0.2,0.4,1.2), 888.8), Vec4d(0.5,0,0,1), 0.1);
 //            m_spheres[2] = new sphere(Color(0,0.8,0), Vec4d(0.7,0,0,1), 0.05);
 //        m_spheres[3] = new sphere(Color(0,1,1), Vec4d(-0.2,-0.2,-0.2,1), 0.1);
 //            m_spheres[4] = new sphere(Color(0,0.8,0.8), Vec4d(-0.4,-0.2,-0.2,1), 0.05);
@@ -63,9 +63,9 @@ GLBox::GLBox( QWidget* parent, const QGLWidget* shareWidget )
 
     m_matrices.resize(m_sphereCount);
 
-    m_light = Light(Vec3d(0.4,0.5,-0.1), Vec3d(0.5,0.7,0.2), Vec3d(0.2,0.1,0.6));
+    m_light = Light(Vec3d(1,1,1), Vec3d(1,1,1), Vec3d(0,0,0));
 
-    //loadTexture("land_shallow_topo_350.jpg");
+    loadTexture("E:\land_shallow_topo_2048.jpg");
 }
 
 
@@ -347,10 +347,10 @@ void GLBox::animate()
 //    }
 
     //Animate spheres
-    m_matrices[1] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis, m_spheres[0]->getCenter());
+//    m_matrices[1] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis, m_spheres[0]->getCenter());
 //    m_matrices[3] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis3, m_spheres[0]->getCenter());
 
-    m_spheres[1]->setCenter(m_matrices[1] * m_spheres[1]->getCenter());
+//    m_spheres[1]->setCenter(m_matrices[1] * m_spheres[1]->getCenter());
 
 //    m_spheres[2]->setCenter(m_matrices[1] * m_spheres[2]->getCenter());
 //    m_matrices[2] = sphereTransMat.makeRotMatPoint(angle2, sphereRotAxis2, m_spheres[1]->getCenter());
@@ -733,21 +733,16 @@ void GLBox::raycast()
 {
     clearImage(Color(1.0, 1.0, 1.0));
     Vec3d eye(0, 0, m_focus);
-    Vec3d pixel;
-    Vec3d view;
-    double x_min = -1;
-    double x_max = 1;
-    double y_min = -1;
-    double y_max = 1;
     for(int x = 0; x < TEX_RES_X; x++)
     {
         for(int y = 0; y < TEX_RES_Y; y++)
         {
-            pixel(0) = x_min + x * ((x_max - x_min) / (double) TEX_RES_X);
-            pixel(1) = y_min + y * ((y_max - y_min) / (double) TEX_RES_Y);
-            pixel(2) = 0;
-            view = pixel - eye;
-            view = view.norm();
+            // Construct the ray for the pixel (i,j)
+            Vec3d viewDir(-1.0 + 2.0*(x/static_cast<double>(TEX_RES_X-1)),
+                          -1.0 + 2.0*(y/static_cast<double>(TEX_RES_Y-1)),
+                          -m_focus);
+            // Normalize the view direction!
+            viewDir = viewDir.norm();
 
             std::vector<Vec3d> hits(m_sphereCount);
             std::vector<int> indices(m_sphereCount);
@@ -755,7 +750,7 @@ void GLBox::raycast()
             for(int i=0; i<m_sphereCount; i++)
             {
                 sphere *curSph = m_spheres[i];
-                hits[i] = curSph->intersect(eye, view);
+                hits[i] = curSph->intersect(eye, viewDir);
                 indices[i] = i;
             }
 
@@ -778,7 +773,24 @@ void GLBox::raycast()
                 {
                     Vec3d normal = hits[0] - m_spheres[indices[0]]->getCenter3();
                     normal = normal.norm();
-                    setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), phong(hits[0], eye, normal, m_light, m_spheres[indices[0]]->getMaterial()));
+
+                    double phi = getPhi(hits[0]);
+                    double theta = getTheta(hits[0]);
+
+                    if(phi + m_phiRot > M_PI)
+                    {
+                        phi = phi + m_phiRot - 2*M_PI;
+                    }
+                    else
+                    {
+                        phi = phi + m_phiRot;
+                    }
+                    Color texCol = getTextureValue(phi, theta);
+                    Material sphMat = m_spheres[indices[0]]->getMaterial();
+                    sphMat.setDiffuse(Vec3d(texCol.r,texCol.g, texCol.b));
+
+                    setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), getTextureValue(phi, theta));
+                    //setPoint(Point2D(x - TEX_HALF_X, y - TEX_HALF_Y), phong(hits[0], eye, normal, m_light, sphMat));
                 }
             }
         }
@@ -821,7 +833,7 @@ Color GLBox::phong(Vec3d hit, Vec3d eyePos, Vec3d normal, Light light, Material 
 
     color += (Material.getSpecular() & light.getLightColor()) * (double) pow((double) specular, Material.getShininess());
 
-    color += ambient;
+    color += ambient & light.getAmbient();
 
 
     for(int i=0; i<3; i++){
@@ -879,9 +891,35 @@ Color GLBox::getTextureValue(double phi, double theta)
         return Color();
     }
 
-    int u_tex = 0;
-    int v_tex = 0;
+    int u_tex = round(((phi + M_PI)/(2*M_PI)) * (m_texture.width()-1));
+    int v_tex = round((theta/M_PI) * (m_texture.height()-1));
     QRgb color = m_texture.pixel(u_tex, v_tex);
     Color result(qRed(color)/255.0, qGreen(color)/255.0, qBlue(color)/255.0);
     return result;
+}
+
+int GLBox::round(double dnumber)
+{
+    return (int) floor(dnumber+0.5);
+}
+
+//Koordinaten anpassen: z=point(1), x=point(0), y=-point(2)
+double GLBox::getPhi(Vec3d point)
+{
+    double phi = atan2(-point(2),point(0));
+    return phi;
+}
+
+double GLBox::getTheta(Vec3d point)
+{
+    double temp_r = sqrt(point(0)*point(0)+point(1)*point(1)+point(2)*point(2));
+    double theta = acos(point(1)/temp_r);
+    return theta;
+}
+
+void GLBox::setPhiRot(int phi)
+{
+    m_phiRot = (2*M_PI / 100) * phi - 2*M_PI / 100;
+    raycast();
+    updateGL();
 }

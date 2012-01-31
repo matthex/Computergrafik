@@ -64,6 +64,9 @@ public:
     //Get focus
     double getFocus();
 
+    // Change phi rotation
+    void setPhiRot(int phi);
+
 public slots:
     // Perform all computations necessary to animate the scene. Invoked by the timer.
     void animate();
@@ -136,6 +139,14 @@ protected:
     // Get texture color
     Color getTextureValue (double phi, double theta);
 
+    // Round
+    int round(double dnumber);
+
+    // Get phi
+    double getPhi(Vec3d point);
+
+    // Get theta
+    double getTheta(Vec3d point);
 
 
 private:
@@ -198,6 +209,8 @@ private:
     Light m_light;
 
     QImage m_texture;
+
+    int m_phiRot;
 };
 
 #endif // _GLBOX_H_

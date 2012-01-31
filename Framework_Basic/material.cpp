@@ -31,3 +31,8 @@ double Material::getShininess()
 {
     return m_shininess;
 }
+
+void Material::setDiffuse(Vec3d diffuse)
+{
+    m_diffuse = diffuse;
+}
